@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Focus Tracker</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#4a90e2">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="modal.css">
+    <link rel="stylesheet" href="todo.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- Login View -->
+    <div id="login-view" class="login-container">
+        <div class="login-card">
+            <h1>Focus Tracker</h1>
+            <p>Enter your username to begin functionality</p>
+            <input type="text" id="username-input" placeholder="Username">
+            <button id="login-btn" class="btn end">Login</button>
+        </div>
+    </div>
+
+    <!-- Main App Container (Hidden by default) -->
+    <div id="app-container" class="hidden">
+        <nav id="main-nav">
+            <div class="nav-brand">Focus Tracker <span id="user-display"></span></div>
+            <div class="nav-links">
+                <button class="nav-btn active" data-view="dashboard-view">Dashboard</button>
+                <button class="nav-btn" data-view="calendar-view">Calendar</button>
+                <button class="nav-btn" data-view="todo-view">To-Do List</button>
+                <button class="nav-btn" data-view="journal-view">Journal</button>
+                <button id="logout-btn" class="nav-btn logout">Logout</button>
+            </div>
+        </nav>
+
+        <main id="content-area">
+            <!-- View: Dashboard (Existing Content) -->
+            <div id="dashboard-view" class="view-section">
+                <header>
+                    <h1>Dashboard</h1>
+                    <div id="real-time-clock">00:00:00</div>
+                </header>
+
+                <!-- Timer Section -->
+                <section class="timer-section">
+                    <div class="input-group">
+                        <input type="text" id="task-name" placeholder="What are you working on? (e.g., C Programming)" autocomplete="off">
+                        <select id="task-type">
+                            <option value="Study">Study</option>
+                            <option value="Break">Break</option>
+                            <option value="Distraction">Distraction</option>
+                        </select>
+                    </div>
+
+                    <div class="timer-display">
+                        <span id="timer">00:00:00</span>
+                    </div>
+
+                    <div class="controls">
+                        <button id="start-btn" class="btn start">Start Task</button>
+                        <button id="end-btn" class="btn end" disabled>End Task</button>
+                        <button id="cancel-btn" class="btn cancel" disabled>Cancel</button>
+                    </div>
+                </section>
+
+                <!-- Dashboard / Stats -->
+                <section class="stats-section">
+                    <h2>Today's Breakdown</h2>
+                    <div class="stats-container">
+                        <div id="summary-container" class="summary-grid">
+                            <!-- Summary items will be injected here -->
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="activityChart"></canvas>
+                        </div>
+                    </div>
+                </section>
+
+    
+                <section class="history-section">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <h2 style="margin-bottom: 0;">Activity Log</h2>
+                        <button id="manual-entry-btn" class="btn-text" style="color: var(--accent-color); font-weight: bold;">+ Log Past Activity</button>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Task</th>
+                                    <th>Type</th>
+                                    <th>Start</th>
+                                    <th>End</th>
+                                    <th>Duration</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="history-list">
+                                <!-- History rows will be injected here -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <button id="clear-data-btn" class="btn-text">Clear All Data</button>
+                </section>
+            </div>
+
+        
+            <div id="calendar-view" class="view-section hidden">
+                <section class="calendar-section">
+                    <div class="calendar-header">
+                        <button id="prev-month" class="btn-icon">&lt;</button>
+                        <h2 id="month-year-display">Month Year</h2>
+                        <button id="next-month" class="btn-icon">&gt;</button>
+                    </div>
+                    <div class="calendar-grid" id="calendar-grid">
+                       
+                    </div>
+                    
+                    <div id="event-modal" class="modal hidden">
+                        <div class="modal-content">
+                            <span class="close-event-modal close-modal">&times;</span>
+                            <h3>Add Event for <span id="event-date-display"></span></h3>
+                            <input type="text" id="event-input" placeholder="Event Name"/>
+                            <input type="time" id="event-time-input" class="event-time-input"/>
+                            <button id="save-event-btn" class="btn end" style="margin-top:10px;">Save Event</button>
+                            <ul id="event-list-display"></ul>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <div id="todo-view" class="view-section hidden">
+                <section class="todo-section">
+                    <div class="todo-header">
+                        <button id="prev-day-btn" class="btn-icon">&lt;</button>
+                        <div class="date-controls">
+                            <h2 id="todo-date-display">Today</h2>
+                            <input type="date" id="todo-date-picker" class="date-picker-input"/>
+                        </div>
+                        <button id="next-day-btn" class="btn-icon">&gt;</button>
+                    </div>
+
+                    <div class="todo-input-container">
+                        <input type="text" id="new-todo-input" placeholder="Add a new task..." autocomplete="off">
+                        <button id="add-todo-btn" class="btn start">+</button>
+                    </div>
+
+                    <div class="todo-list-container">
+                        <ul id="todo-list">
+                            <!-- Todo items injected here -->
+                        </ul>
+                        <div id="todo-empty-state" class="empty-state hidden">
+                            <p>No tasks for this day. Enjoy your free time!</p>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- View: Journal -->
+            <div id="journal-view" class="view-section hidden">
+                <section class="journal-section">
+                    <div class="journal-header">
+                        <h2>Daily Journal</h2>
+                        <input type="date" id="journal-date-picker">
+                    </div>
+                    <div class="journal-form">
+                        <div class="form-group">
+                            <label>Daily Summary</label>
+                            <textarea id="journal-summary" placeholder="How did the day go?"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>One Good Thing</label>
+                            <textarea id="journal-good" placeholder="What went well?"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>One Improvement</label>
+                            <textarea id="journal-improve" placeholder="What can be better tomorrow?"></textarea>
+                        </div>
+                        <button id="save-journal-btn" class="btn start">Save Entry</button>
+                        <p id="journal-status" style="margin-top: 10px; color: var(--success-color);"></p>
+                    </div>
+
+                    <div class="journal-history" style="margin-top: 30px; border-top: 1px solid var(--border-color); padding-top: 20px;">
+                        <h3>Past Entries</h3>
+                        <div id="journal-list" style="margin-top: 10px; display: grid; gap: 10px;">
+                            <!-- Journal entries injected here -->
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- Manual Entry Modal -->
+    <div id="manual-entry-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2>Log Past Activity</h2>
+            
+            <div class="input-group" style="flex-direction: column; align-items: stretch;">
+                <label>Task Name</label>
+                <input type="text" id="manual-task-name" placeholder="What did you do?">
+            </div>
+
+            <div class="input-group" style="flex-direction: column; align-items: stretch;">
+                <label>Type</label>
+                <select id="manual-task-type">
+                    <option value="Study">Study</option>
+                    <option value="Break">Break</option>
+                    <option value="Distraction">Distraction</option>
+                </select>
+            </div>
+
+            <div class="input-group" style="flex-direction: column; align-items: stretch;">
+                <label>Date</label>
+                <input type="date" id="manual-task-date">
+            </div>
+
+            <div style="display: flex; gap: 10px;">
+                <div class="input-group" style="flex-direction: column; align-items: stretch; flex: 1;">
+                    <label>Start Time</label>
+                    <input type="time" id="manual-start-time">
+                </div>
+                <div class="input-group" style="flex-direction: column; align-items: stretch; flex: 1;">
+                    <label>End Time</label>
+                    <input type="time" id="manual-end-time">
+                </div>
+            </div>
+
+            <div class="controls" style="margin-top: 20px;">
+                <button id="save-manual-btn" class="btn end">Save Entry</button>
+                <button id="cancel-manual-btn" class="btn cancel">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js')
+                .then(reg => console.log('Service Worker registered', reg))
+                .catch(err => console.log('Service Worker registration failed', err));
+        }
+    </script>
+</body>
+</html>
